@@ -12,5 +12,7 @@ public class Team
 
     public int ProjectId { get; set; }
     public virtual Project Project { get; set; }
+
+    // СВЯЗЬ с сотрудниками
     public virtual ICollection<Employee> Employees { get; set; }
 }

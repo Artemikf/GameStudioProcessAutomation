@@ -19,4 +19,11 @@ public class Project
     [Required(ErrorMessage = "Статус обязателен")]
     public string Status { get; set; }
 
+    // СВЯЗИ 
+    public virtual ICollection<Team> Teams { get; set; }
+    public virtual ICollection<Task> Tasks { get; set; }
+    public virtual GameConcept GameConcept { get; set; }
+    public virtual TechnicalRequirements TechnicalRequirements { get; set; }
+    public virtual ICollection<Asset> Assets { get; set; }
+    public virtual ICollection<BugReport> BugReports { get; set; }
 }
