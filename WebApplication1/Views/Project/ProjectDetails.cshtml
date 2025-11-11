@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Project Details";
+}
+
+<h2>Project Details</h2>
+
+@if (ViewBag.Project != null)
+{
+    var project = ViewBag.Project as WebApplication1.Models.Project;
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@project.Name</h5>
+            <p class="card-text">
+                <strong>Budget:</strong> @project.Budget<br>
+                <strong>Deadline:</strong> @project.Deadline.ToShortDateString()<br>
+                <strong>Status:</strong> @project.Status
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <p>Project not found.</p>
+}
+
+<a href="@Url.Action("Projects", "Home")" class="btn btn-secondary mt-3">Back to Projects</a>

@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Debug Database";
+}
+
+<h2>Debug Database</h2>
+
+<div class="alert alert-info">
+    <h4>Projects in database: @ViewBag.Count</h4>
+</div>
+
+@if (ViewBag.Projects != null && ViewBag.Count > 0)
+{
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Budget</th>
+                <th>Deadline</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in ViewBag.Projects)
+            {
+                <tr>
+                    <td>@project.Id</td>
+                    <td>@project.Name</td>
+                    <td>$@project.Budget.ToString("N0")</td>
+                    <td>@project.Deadline.ToString("dd.MM.yyyy")</td>
+                    <td><span class="badge badge-primary">@project.Status</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning">
+        No projects found in database!
+    </div>
+}
+
+<div class="mt-3">
+    <a href="@Url.Action("CreateProject")" class="btn btn-primary">Create Project</a>
+    <a href="@Url.Action("Projects")" class="btn btn-secondary">View Projects</a>
+</div>

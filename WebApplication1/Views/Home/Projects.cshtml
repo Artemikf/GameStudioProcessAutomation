@@ -1,0 +1,67 @@
+﻿@model IEnumerable<WebApplication1.Models.Project>
+
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<div class="table-container">
+    <div class="form-header">
+        <h2>Game Projects</h2>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <p>No projects found.</p>
+            <a href="@Url.Action("CreateProject")" class="btn btn-primary">Create the first project</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Budget</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var project in Model)
+                    {
+                        <tr>
+                            <td>@project.Id</td>
+                            <td>@project.Name</td>
+                            <td>$@project.Budget.ToString("N0")</td>
+                            <td>@project.Deadline.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <span class="badge badge-info">@project.Status</span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("ProjectDetails", "Project", new { id = project.Id })"
+                                   class="btn btn-info btn-sm">Details</a>
+                                <a href="@Url.Action("AssignTask", "Project", new { projectId = project.Id })"
+                                   class="btn btn-success btn-sm">Assign Task</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="text-center mt-3">
+        <a href="@Url.Action("CreateProject")" class="btn btn-primary">Create New Project</a>
+    </div>
+</div>
