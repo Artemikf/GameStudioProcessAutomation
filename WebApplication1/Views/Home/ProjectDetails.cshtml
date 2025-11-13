@@ -1,0 +1,44 @@
+﻿@model WebApplication1.Models.Project
+
+@{
+    ViewData["Title"] = "Project Details";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>Детали проекта: @Model.Name</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Основная информация</h5>
+                    <p><strong>ID:</strong> @Model.Id</p>
+                    <p><strong>Название:</strong> @Model.Name</p>
+                    <p><strong>Бюджет:</strong> $@Model.Budget.ToString("N0")</p>
+                    <p><strong>Дедлайн:</strong> @Model.Deadline.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Статус:</strong> <span class="badge bg-primary">@Model.Status</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Статистика</h5>
+                    <p><strong>Задач:</strong> @Model.Tasks?.Count</p>
+                    <p><strong>Команд:</strong> @Model.Teams?.Count</p>
+                    <p>
+                        <strong>Дней до дедлайна:</strong>
+                        @((Model.Deadline - DateTime.Now).Days) дней
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="@Url.Action("Projects")" class="btn btn-secondary">Назад к списку</a>
+        <a href="@Url.Action("EditProject", new { id = Model.Id })" class="btn btn-warning">Редактировать</a>
+    </div>
+</div>

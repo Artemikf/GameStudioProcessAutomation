@@ -1,0 +1,56 @@
+﻿@model WebApplication1.Models.Project
+
+@{
+    ViewData["Title"] = "Edit Project";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>Редактировать проект</h2>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Ошибка:</strong> @ViewBag.Error
+        </div>
+    }
+
+    <form method="post" action="@Url.Action("EditProject", new { id = Model.Id })">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <div class="form-group">
+            <label for="Name" class="form-label">Название проекта</label>
+            <input type="text" id="Name" name="Name" class="form-control" value="@Model.Name" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Budget" class="form-label">Бюджет ($)</label>
+            <input type="number" id="Budget" name="Budget" class="form-control"
+                   step="0.01" min="0" value="@Model.Budget" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Deadline" class="form-label">Дедлайн</label>
+            <input type="date" id="Deadline" name="Deadline" class="form-control"
+                   value="@Model.Deadline.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Status" class="form-label">Статус</label>
+            <select id="Status" name="Status" class="form-control" required>
+                <option value="Planning" selected="@(Model.Status == "Planning")">Planning</option>
+                <option value="Development" selected="@(Model.Status == "Development")">Development</option>
+                <option value="Testing" selected="@(Model.Status == "Testing")">Testing</option>
+                <option value="Completed" selected="@(Model.Status == "Completed")">Completed</option>
+            </select>
+        </div>
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="@Url.Action("Projects")" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>

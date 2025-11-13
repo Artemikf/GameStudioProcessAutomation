@@ -1,0 +1,31 @@
+﻿@model WebApplication1.Models.Project
+
+@{
+    ViewData["Title"] = "Delete Project";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2 class="text-danger">Удалить проект</h2>
+    </div>
+
+    <div class="alert alert-warning">
+        <h5>Вы уверены что хотите удалить этот проект?</h5>
+        <p>Это действие нельзя отменить.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5>@Model.Name</h5>
+            <p><strong>Бюджет:</strong> $@Model.Budget.ToString("N0")</p>
+            <p><strong>Дедлайн:</strong> @Model.Deadline.ToString("dd.MM.yyyy")</p>
+            <p><strong>Статус:</strong> <span class="badge bg-primary">@Model.Status</span></p>
+        </div>
+    </div>
+
+    <form asp-action="DeleteProject" method="post" class="text-center mt-4">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="@Url.Action("Projects")" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>

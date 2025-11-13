@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "Add Task to Project";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>Добавить задачу к проекту</h2>
+        @if (ViewBag.Project != null)
+        {
+            <p class="lead">Проект: <strong>@ViewBag.Project.Name</strong> (ID: @ViewBag.ProjectId)</p>
+        }
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Ошибка:</strong> @ViewBag.Error
+        </div>
+    }
+
+    <form method="post" action="@Url.Action("AssignTask", new { projectId = ViewBag.ProjectId })">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+
+        <div class="form-group">
+            <label for="Description" class="form-label">Описание задачи *</label>
+            <textarea id="Description" name="Description" class="form-control"
+                      rows="3" required placeholder="Опишите задачу..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="Priority" class="form-label">Приоритет *</label>
+            <select id="Priority" name="Priority" class="form-control" required>
+                <option value="">Выберите приоритет</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="Status" class="form-label">Статус *</label>
+            <select id="Status" name="Status" class="form-control" required>
+                <option value="">Выберите статус</option>
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Review">Review</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="EstimatedTime" class="form-label">Оценочное время (часы) *</label>
+            <input type="number" id="EstimatedTime" name="EstimatedTime" class="form-control"
+                   min="1" max="500" required placeholder="Введите время в часах" />
+        </div>
+
+        <div class="form-group">
+            <label for="AssignedEmployeeId" class="form-label">Назначить сотруднику (опционально)</label>
+            <select id="AssignedEmployeeId" name="AssignedEmployeeId" class="form-control">
+                <option value="">Не назначать</option>
+                @if (ViewBag.Employees != null)
+                {
+                    foreach (var employee in ViewBag.Employees)
+                    {
+                        <option value="@employee.Id">@employee.FirstName @employee.LastName - @employee.Position</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Создать задачу
+            </button>
+            <a href="@Url.Action("Projects")" class="btn btn-secondary btn-lg">Отмена</a>
+        </div>
+    </form>
+</div>
