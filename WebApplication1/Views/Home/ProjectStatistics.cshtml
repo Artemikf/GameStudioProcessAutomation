@@ -1,0 +1,199 @@
+﻿@model WebApplication1.Models.StatsFilter
+
+@{
+    ViewData["Title"] = "Статистика проектов";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>📊 Статистика проектов</h2>
+        <p class="lead">Узагальнення даних по бюджетам проектов за период</p>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Ошибка:</strong> @ViewBag.Error
+        </div>
+    }
+
+    <!-- ФОРМА ФИЛЬТРАЦИИ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Фильтры статистики</h5>
+            <form method="post" class="row g-3">
+                <div class="col-md-3">
+                    <label for="PeriodType" class="form-label">Тип периода</label>
+                    <select id="PeriodType" name="PeriodType" class="form-control" onchange="updateDates()">
+                        <option value="day" selected="@(Model.PeriodType == "day")">День</option>
+                        <option value="month" selected="@(Model.PeriodType == "month")">Месяц</option>
+                        <option value="quarter" selected="@(Model.PeriodType == "quarter")">Квартал</option>
+                        <option value="year" selected="@(Model.PeriodType == "year")">Год</option>
+                        <option value="custom" selected="@(Model.PeriodType == "custom")">Произвольный</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="StartDate" class="form-label">Начальная дата</label>
+                    <input type="date" id="StartDate" name="StartDate" class="form-control"
+                           value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="EndDate" class="form-label">Конечная дата</label>
+                    <input type="date" id="EndDate" name="EndDate" class="form-control"
+                           value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="StatusFilter" class="form-label">Статус проекта</label>
+                    <select id="StatusFilter" name="StatusFilter" class="form-control">
+                        <option value="all" selected="@(Model.StatusFilter == "all")">Все статусы</option>
+                        @foreach (var status in ViewBag.Statuses)
+                        {
+                            <option value="@status" selected="@(Model.StatusFilter == status)">@status</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Рассчитать статистику</button>
+                    <a href="@Url.Action("QuickStats", new { period = "month" })" class="btn btn-outline-secondary">Быстрая статистика</a>
+                    <a href="@Url.Action("ProjectStatistics")" class="btn btn-outline-secondary">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- СТАТИСТИКА -->
+    @if (ViewBag.Stats != null)
+    {
+        var stats = ViewBag.Stats as WebApplication1.Models.StatsSummary;
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">@stats.Period</h4>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h3 class="text-primary">@stats.ProjectsCount</h3>
+                                <p class="mb-0">Проектов</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h3 class="text-success">$@stats.TotalBudget.ToString("N0")</h3>
+                                <p class="mb-0">Общий бюджет</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h3 class="text-info">$@stats.AverageBudget.ToString("N0")</h3>
+                                <p class="mb-0">Средний бюджет</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h3 class="text-warning">@stats.MostCommonStatus</h3>
+                                <p class="mb-0">Популярный статус</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ДЕТАЛЬНАЯ СТАТИСТИКА -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Распределение бюджетов:</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Максимальный бюджет
+                                <span class="badge bg-primary rounded-pill">$@stats.MaxBudget.ToString("N0")</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Минимальный бюджет
+                                <span class="badge bg-primary rounded-pill">$@stats.MinBudget.ToString("N0")</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Статистика по статусам:</h5>
+                        @if (ViewBag.Projects != null)
+                        {
+                            var statusGroups = ((IEnumerable<WebApplication1.Models.Project>)ViewBag.Projects)
+                            .GroupBy(p => p.Status)
+                            .Select(g => new { Status = g.Key, Count = g.Count(), Total = g.Sum(p => p.Budget) });
+
+                            foreach (var group in statusGroups)
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>@group.Status</span>
+                                    <span>
+                                        <span class="badge bg-secondary">@group.Count</span>
+                                        <span class="badge bg-success">$@group.Total.ToString("N0")</span>
+                                    </span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- БЫСТРЫЕ ССЫЛКИ -->
+    <div class="text-center">
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("QuickStats", new { period = "day" })" class="btn btn-outline-primary">За день</a>
+            <a href="@Url.Action("QuickStats", new { period = "week" })" class="btn btn-outline-primary">За неделю</a>
+            <a href="@Url.Action("QuickStats", new { period = "month" })" class="btn btn-outline-primary">За месяц</a>
+            <a href="@Url.Action("QuickStats", new { period = "quarter" })" class="btn btn-outline-primary">За квартал</a>
+            <a href="@Url.Action("QuickStats", new { period = "year" })" class="btn btn-outline-primary">За год</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateDates() {
+            const periodType = document.getElementById('PeriodType').value;
+            const endDate = new Date();
+            let startDate = new Date();
+
+            switch (periodType) {
+                case 'day':
+                    startDate.setDate(endDate.getDate() - 1);
+                    break;
+                case 'month':
+                    startDate.setMonth(endDate.getMonth() - 1);
+                    break;
+                case 'quarter':
+                    startDate.setMonth(endDate.getMonth() - 3);
+                    break;
+                case 'year':
+                    startDate.setFullYear(endDate.getFullYear() - 1);
+                    break;
+                case 'custom':
+                    // Оставляем текущие даты
+                    return;
+            }
+
+            document.getElementById('StartDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('EndDate').value = endDate.toISOString().split('T')[0];
+        }
+
+        // Инициализация дат при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDates();
+        });
+    </script>
+}

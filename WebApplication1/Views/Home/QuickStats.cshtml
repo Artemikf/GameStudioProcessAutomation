@@ -1,0 +1,68 @@
+﻿@model WebApplication1.Models.StatsSummary
+
+@{
+    ViewData["Title"] = "Быстрая статистика";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>🚀 Быстрая статистика</h2>
+        <p class="lead">@Model.Period</p>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-md-2 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2>@Model.ProjectsCount</h2>
+                    <p class="mb-0">Проектов</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h2>$@Model.TotalBudget.ToString("N0")</h2>
+                    <p class="mb-0">Общий бюджет</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h2>$@Model.AverageBudget.ToString("N0")</h2>
+                    <p class="mb-0">Средний бюджет</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h2>$@Model.MaxBudget.ToString("N0")</h2>
+                    <p class="mb-0">Макс. бюджет</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h2>$@Model.MinBudget.ToString("N0")</h2>
+                    <p class="mb-0">Мин. бюджет</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h5>@Model.MostCommonStatus</h5>
+                    <p class="mb-0">Популярный статус</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="@Url.Action("ProjectStatistics")" class="btn btn-primary">Расширенная статистика</a>
+        <a href="@Url.Action("Projects")" class="btn btn-secondary">К проектам</a>
+    </div>
+</div>

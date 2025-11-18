@@ -25,12 +25,14 @@ namespace WebApplication1.Controllers
         //    return View(projects);
         //}
 
+        // Get Create
         [HttpGet]
         public IActionResult CreateProject()
         {
             return View();
         }
 
+        // Post Create
         [HttpPost]
         public IActionResult CreateProject(IFormCollection form)
         {
@@ -386,6 +388,137 @@ namespace WebApplication1.Controllers
                 ViewBag.Employees = _context.Employees.ToList();
                 return View();
             }
+        }
+
+        // -------------
+
+        // GET: Project Statistics
+        [HttpGet]
+        public IActionResult ProjectStatistics()
+        {
+            var model = new StatsFilter
+            {
+                StartDate = DateTime.Now.AddMonths(-1),
+                EndDate = DateTime.Now,
+                PeriodType = "month",
+                StatusFilter = "all"
+            };
+
+            ViewBag.Statuses = _context.Projects.Select(p => p.Status).Distinct().ToList();
+            return View(model);
+        }
+
+        // POST: Project Statistics with filtering
+        [HttpPost]
+        public IActionResult ProjectStatistics(StatsFilter filter)
+        {
+            try
+            {
+                Debug.WriteLine($"=== STATISTICS CALCULATION STARTED ===");
+                Debug.WriteLine($"Period: {filter.PeriodType}, From: {filter.StartDate}, To: {filter.EndDate}, Status: {filter.StatusFilter}");
+
+                // Базовый запрос с фильтрацией по дате
+                var projectsQuery = _context.Projects
+                    .Where(p => p.Deadline >= filter.StartDate && p.Deadline <= filter.EndDate);
+
+                // Дополнительная фильтрация по статусу
+                if (filter.StatusFilter != "all")
+                {
+                    projectsQuery = projectsQuery.Where(p => p.Status == filter.StatusFilter);
+                }
+
+                var projects = projectsQuery.ToList();
+                Debug.WriteLine($"Found {projects.Count} projects for statistics");
+
+                // Расчет статистики
+                var stats = new StatsSummary
+                {
+                    ProjectsCount = projects.Count,
+                    TotalBudget = projects.Sum(p => p.Budget),
+                    AverageBudget = projects.Any() ? projects.Average(p => p.Budget) : 0,
+                    MaxBudget = projects.Any() ? projects.Max(p => p.Budget) : 0,
+                    MinBudget = projects.Any() ? projects.Min(p => p.Budget) : 0,
+                    MostCommonStatus = projects.Any() ?
+                        projects.GroupBy(p => p.Status)
+                               .OrderByDescending(g => g.Count())
+                               .First().Key : "Нет данных"
+                };
+
+                // Определяем период для отображения
+                stats.Period = filter.PeriodType switch
+                {
+                    "day" => $"День: {filter.StartDate:dd.MM.yyyy}",
+                    "month" => $"Месяц: {filter.StartDate:MMMM yyyy}",
+                    "quarter" => $"Квартал: {GetQuarter(filter.StartDate)}",
+                    "year" => $"Год: {filter.StartDate:yyyy}",
+                    "custom" => $"Период: {filter.StartDate:dd.MM.yyyy} - {filter.EndDate:dd.MM.yyyy}",
+                    _ => "Неизвестный период"
+                };
+
+                Debug.WriteLine($"Statistics calculated: {stats.ProjectsCount} projects, Total: {stats.TotalBudget:C}");
+                Debug.WriteLine($"=== STATISTICS CALCULATION COMPLETED ===");
+
+                ViewBag.Stats = stats;
+                ViewBag.Projects = projects;
+                ViewBag.Statuses = _context.Projects.Select(p => p.Status).Distinct().ToList();
+                return View(filter);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"=== STATISTICS ERROR ===");
+                Debug.WriteLine($"Error: {ex.Message}");
+                Debug.WriteLine($"Stack: {ex.StackTrace}");
+
+                ViewBag.Error = $"Ошибка расчета статистики: {ex.Message}";
+                ViewBag.Statuses = _context.Projects.Select(p => p.Status).Distinct().ToList();
+                return View(filter);
+            }
+        }
+
+        // Вспомогательный метод для определения квартала
+        private string GetQuarter(DateTime date)
+        {
+            int quarter = (date.Month - 1) / 3 + 1;
+            return $"{quarter} квартал {date:yyyy}";
+        }
+
+        // GET: Quick Statistics (быстрая статистика)
+        public IActionResult QuickStats(string period = "month")
+        {
+            var endDate = DateTime.Now;
+            var startDate = period switch
+            {
+                "day" => endDate.AddDays(-1),
+                "week" => endDate.AddDays(-7),
+                "month" => endDate.AddMonths(-1),
+                "quarter" => endDate.AddMonths(-3),
+                "year" => endDate.AddYears(-1),
+                _ => endDate.AddMonths(-1)
+            };
+
+            var projects = _context.Projects
+                .Where(p => p.Deadline >= startDate && p.Deadline <= endDate)
+                .ToList();
+
+            var stats = new StatsSummary
+            {
+                Period = period switch
+                {
+                    "day" => "За сегодня",
+                    "week" => "За неделю",
+                    "month" => "За месяц",
+                    "quarter" => "За квартал",
+                    "year" => "За год",
+                    _ => "За месяц"
+                },
+                ProjectsCount = projects.Count,
+                TotalBudget = projects.Sum(p => p.Budget),
+                AverageBudget = projects.Any() ? projects.Average(p => p.Budget) : 0,
+                MaxBudget = projects.Any() ? projects.Max(p => p.Budget) : 0,
+                MinBudget = projects.Any() ? projects.Min(p => p.Budget) : 0
+            };
+
+            return View(stats);
         }
     }
 }
