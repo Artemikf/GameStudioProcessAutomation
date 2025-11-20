@@ -1,4 +1,4 @@
-﻿@model WebApplication1.Models.User
+﻿@model WebApplication1.Models.RegisterModel
 
 @{
     ViewData["Title"] = "Регистрация";
@@ -10,8 +10,8 @@
         <p class="lead">Создайте новый аккаунт</p>
     </div>
 
-    <form asp-action="Register" method="post">
-        @Html.AntiForgeryToken()
+    <form asp-action="Register" method="post" id="registerForm">
+        @* @Html.AntiForgeryToken() *@
 
         <div class="form-group">
             <label asp-for="Username" class="form-label">Имя пользователя *</label>
@@ -55,3 +55,13 @@
         </div>
     </form>
 </div>
+
+@* @section Scripts {
+    <script>
+        console.log("Register page loaded");
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            console.log('Form submitted');
+        });
+    </script>
+} *@

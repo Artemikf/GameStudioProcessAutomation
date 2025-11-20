@@ -55,20 +55,44 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        // POST: Register
         [HttpPost]
-        public IActionResult Register(User model)
+        [IgnoreAntiforgeryToken]
+        public IActionResult Register(RegisterModel model)
         {
+            Console.OutputEncoding = System.Text.Encoding.Default;
+
+            Console.WriteLine("=== REGISTER CONTROLLER ===");
+            Console.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+
             if (ModelState.IsValid)
             {
-                if (_authService.Register(model))
+                Console.WriteLine("Model is valid. Attempting to register...");
+                var user = new User
                 {
+                    Username = model.Username,
+                    Email = model.Email,
+                    Password = model.Password,
+                    Role = model.Role
+                };
+
+                if (_authService.Register(user))
+                {
+                    Console.WriteLine("Register returned true. Redirecting to login...");
                     TempData["SuccessMessage"] = "Регистрация прошла успешно! Теперь вы можете войти.";
                     return RedirectToAction("Login");
                 }
                 else
                 {
+                    Console.WriteLine("Register returned false. User might already exist.");
                     ModelState.AddModelError("", "Пользователь с таким именем или email уже существует");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Model is not valid. Errors:");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($" - {error.ErrorMessage}");
                 }
             }
             return View(model);

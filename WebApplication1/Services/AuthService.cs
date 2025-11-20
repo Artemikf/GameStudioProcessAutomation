@@ -37,30 +37,55 @@ namespace WebApplication1.Services
             }
         }
 
-        // Регистрация пользователя
         public bool Register(User user)
+{
+    try
+    {
+        Console.WriteLine($"=== РЕГИСТРАЦИЯ НАЧАТА ===");
+        Console.WriteLine($"Username: {user.Username}");
+        Console.WriteLine($"Email: {user.Email}");
+        Console.WriteLine($"Role: {user.Role}");
+
+        // Проверяем нет ли пользователя с таким именем или email
+        var userExists = _context.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
+        Console.WriteLine($"Пользователь уже существует: {userExists}");
+
+        if (userExists)
         {
-            try
-            {
-                // Проверяем нет ли пользователя с таким именем или email
-                if (_context.Users.Any(u => u.Username == user.Username || u.Email == user.Email))
-                {
-                    return false;
-                }
-
-                // Хешируем пароль
-                user.Password = HashPassword(user.Password);
-                user.CreatedAt = DateTime.Now;
-
-                _context.Users.Add(user);
-                _context.SaveChanges();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
+
+        // Хешируем пароль
+        var originalPassword = user.Password;
+        user.Password = HashPassword(user.Password);
+        user.CreatedAt = DateTime.Now;
+
+        Console.WriteLine($"Пароль захеширован: {originalPassword} -> {user.Password}");
+
+        _context.Users.Add(user);
+        var result = _context.SaveChanges();
+        
+        Console.WriteLine($"=== РЕГИСТРАЦИЯ УСПЕШНА ===");
+        Console.WriteLine($"Сохранено записей: {result}");
+        Console.WriteLine($"ID нового пользователя: {user.Id}");
+        
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"=== ОШИБКА РЕГИСТРАЦИИ ===");
+        Console.WriteLine($"Сообщение: {ex.Message}");
+        Console.WriteLine($"Тип исключения: {ex.GetType()}");
+        Console.WriteLine($"StackTrace: {ex.StackTrace}");
+        
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Внутренняя ошибка: {ex.InnerException.Message}");
+        }
+        
+        return false;
+    }
+}
 
         // Авторизация пользователя
         public User Login(string username, string password)
