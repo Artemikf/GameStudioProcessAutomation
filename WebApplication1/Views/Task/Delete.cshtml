@@ -1,0 +1,58 @@
+﻿@model WebApplication1.Models.Task
+
+@{
+    ViewData["Title"] = "Удаление задачи";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2 class="text-danger">Удаление задачи</h2>
+    </div>
+
+    <div class="alert alert-warning">
+        <h5>Вы уверены, что хотите удалить эту задачу?</h5>
+        <p>Это действие нельзя отменить.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5>@Model.Description</h5>
+            <p><strong>Проект:</strong> @Model.Project?.Name</p>
+            <p><strong>Приоритет:</strong> <span class="badge @GetPriorityClass(Model.Priority)">@Model.Priority</span></p>
+            <p><strong>Статус:</strong> <span class="badge @GetStatusClass(Model.Status)">@Model.Status</span></p>
+            <p><strong>Оценочное время:</strong> @Model.EstimatedTime часов</p>
+            <p><strong>Дата создания:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post" class="text-center mt-4">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="@Url.Action("Index", "Task")" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+
+@functions {
+    string GetPriorityClass(string priority)
+    {
+        return priority switch
+        {
+            "High" => "bg-danger",
+            "Medium" => "bg-warning text-dark",
+            "Low" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "New" => "bg-secondary text-white",
+            "InProgress" => "bg-primary text-white",
+            "Completed" => "bg-success text-white",
+            "Cancelled" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

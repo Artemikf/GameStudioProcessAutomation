@@ -6,13 +6,26 @@ public class Task
 {
     public int Id { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Описание задачи обязательно")]
+    [Display(Name = "Описание задачи")]
     public string Description { get; set; }
 
-    public string Priority { get; set; }
-    public string Status { get; set; }
+    [Required(ErrorMessage = "Приоритет обязателен")]
+    [Display(Name = "Приоритет")]
+    public string Priority { get; set; } = "Medium";
+
+    [Required(ErrorMessage = "Статус обязателен")]
+    [Display(Name = "Статус")]
+    public string Status { get; set; } = "New";
+
+    [Required(ErrorMessage = "Оценочное время обязательно")]
+    [Range(1, int.MaxValue, ErrorMessage = "Время должно быть положительным")]
+    [Display(Name = "Оценочное время (часы)")]
     public int EstimatedTime { get; set; }
 
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+    // Связи
     public int ProjectId { get; set; }
     public virtual Project Project { get; set; }
 

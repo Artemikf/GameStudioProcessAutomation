@@ -62,52 +62,17 @@ if (!app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseAuthorization();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider.GetRequiredService<GameDevContext>();
-//    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-
-//    try
-//    {
-//        Console.WriteLine("Проверка базы данных...");
-
-//        // Убедимся, что база данных создана
-//        context.Database.EnsureCreated();
-//        Console.WriteLine("База данных проверена/создана");
-
-//        // Создание администратора по умолчанию
-//        if (!context.Users.Any())
-//        {
-//            Console.WriteLine("Создание администратора...");
-//            var adminUser = new User
-//            {
-//                Username = "admin",
-//                Email = "admin@company.com",
-//                Password = "admin123",
-//                Role = "Admin"
-//            };
-
-//            var success = authService.Register(adminUser);
-//            Console.WriteLine($"Администратор создан: {success}");
-//        }
-//        else
-//        {
-//            Console.WriteLine("Пользователи уже существуют в базе данных");
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine($"Ошибка при инициализации БД: {ex.Message}");
-//        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-//    }
-//}
-
 // МАРШРУТИЗАЦІЯ
 app.MapCustomRoutes();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "tasks",
+    pattern: "Task/{action=Index}/{id?}",
+    defaults: new { controller = "Task" });
 
 
 app.Run();

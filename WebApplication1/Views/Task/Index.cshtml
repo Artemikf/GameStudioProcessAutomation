@@ -1,0 +1,169 @@
+﻿@model IEnumerable<WebApplication1.Models.Task>
+
+@{
+    ViewData["Title"] = "Управление задачами";
+}
+
+<div class="table-container">
+    <div class="form-header">
+        <h2>Управление задачами</h2>
+        <p class="lead">Фильтрация и управление задачами проектов</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Панель фильтров -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Поиск</label>
+                    <input type="text" class="form-control" name="searchString"
+                           value="@ViewData["CurrentFilter"]" placeholder="Описание задачи...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Статус</label>
+                    <select class="form-control" name="statusFilter">
+                        <option value="">Все статусы</option>
+                        @foreach (var status in ViewBag.Statuses)
+                        {
+                            <option value="@status" selected="@(ViewData["StatusFilter"]?.ToString() == status)">
+                                @status
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Приоритет</label>
+                    <select class="form-control" name="priorityFilter">
+                        <option value="">Все приоритеты</option>
+                        @foreach (var priority in ViewBag.Priorities)
+                        {
+                            <option value="@priority" selected="@(ViewData["PriorityFilter"]?.ToString() == priority)">
+                                @priority
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Проект</label>
+                    <select class="form-control" name="projectId">
+                        <option value="">Все проекты</option>
+                        @foreach (var project in ViewBag.Projects)
+                        {
+                            <option value="@project.Id" selected="@(ViewData["ProjectId"]?.ToString() == project.Id.ToString())">
+                                @project.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Применить</button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Список задач (@Model.Count())</h5>
+        <a href="@Url.Action("Create")" class="btn btn-success">+ Новая задача</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <p>Задачи не найдены.</p>
+            <a href="@Url.Action("Create")" class="btn btn-primary">Создать первую задачу</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Описание</th>
+                        <th>Проект</th>
+                        <th>Приоритет</th>
+                        <th>Статус</th>
+                        <th>Время (ч)</th>
+                        <th>Исполнитель</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model)
+                    {
+                        <tr>
+                            <td>@task.Id</td>
+                            <td>@task.Description</td>
+                            <td>
+                                <a href="@Url.Action("ProjectDetails", "Home", new { id = task.ProjectId })">
+                                    @task.Project?.Name
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge @GetPriorityClass(task.Priority)">
+                                    @task.Priority
+                                </span>
+                            </td>
+                            <td>
+                                <form method="post" action="@Url.Action("UpdateStatus")" class="d-inline">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <select name="status" onchange="this.form.submit()"
+                                            class="form-select form-select-sm @GetStatusClass(task.Status)">
+                                        <option value="New" selected="@(task.Status == "New")">New</option>
+                                        <option value="InProgress" selected="@(task.Status == "InProgress")">In Progress</option>
+                                        <option value="Completed" selected="@(task.Status == "Completed")">Completed</option>
+                                        <option value="Cancelled" selected="@(task.Status == "Cancelled")">Cancelled</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td>@task.EstimatedTime</td>
+                            <td>@task.AssignedEmployee?.FirstName @task.AssignedEmployee?.LastName</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="@Url.Action("Details", new { id = task.Id })" class="btn btn-info btn-sm">👁️</a>
+                                    <a href="@Url.Action("Edit", new { id = task.Id })" class="btn btn-warning btn-sm">✏️</a>
+                                    <a href="@Url.Action("Delete", new { id = task.Id })" class="btn btn-danger btn-sm">🗑️</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetPriorityClass(string priority)
+    {
+        return priority switch
+        {
+            "High" => "bg-danger",
+            "Medium" => "bg-warning text-dark",
+            "Low" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "New" => "bg-secondary text-white",
+            "InProgress" => "bg-primary text-white",
+            "Completed" => "bg-success text-white",
+            "Cancelled" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

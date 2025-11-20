@@ -1,0 +1,83 @@
+﻿@model WebApplication1.Models.Task
+
+@{
+    ViewData["Title"] = "Детали задачи";
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>Детали задачи</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Основная информация</h5>
+                    <p><strong>ID:</strong> @Model.Id</p>
+                    <p><strong>Описание:</strong> @Model.Description</p>
+                    <p><strong>Приоритет:</strong> <span class="badge @GetPriorityClass(Model.Priority)">@Model.Priority</span></p>
+                    <p><strong>Статус:</strong> <span class="badge @GetStatusClass(Model.Status)">@Model.Status</span></p>
+                    <p><strong>Оценочное время:</strong> @Model.EstimatedTime часов</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Связи</h5>
+                    <p>
+                        <strong>Проект:</strong>
+                        <a href="@Url.Action("ProjectDetails", "Home", new { id = Model.ProjectId })">
+                            @Model.Project?.Name
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Исполнитель:</strong>
+                        @if (Model.AssignedEmployee != null)
+                        {
+                            <text>@Model.AssignedEmployee.FirstName @Model.AssignedEmployee.LastName</text>
+                        }
+                        else
+                        {
+                            <text>Не назначен</text>
+                        }
+                    </p>
+                    <p><strong>Дата создания:</strong> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="@Url.Action("Index", "Task")" class="btn btn-secondary">Назад к списку</a>
+        <a href="@Url.Action("Edit", "Task", new { id = Model.Id })" class="btn btn-warning">Редактировать</a>
+        <a href="@Url.Action("Delete", "Task", new { id = Model.Id })" class="btn btn-danger">Удалить</a>
+    </div>
+</div>
+
+@functions {
+    string GetPriorityClass(string priority)
+    {
+        return priority switch
+        {
+            "High" => "bg-danger",
+            "Medium" => "bg-warning text-dark",
+            "Low" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "New" => "bg-secondary text-white",
+            "InProgress" => "bg-primary text-white",
+            "Completed" => "bg-success text-white",
+            "Cancelled" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

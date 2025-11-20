@@ -11,7 +11,7 @@
     </div>
 
     <form asp-action="Register" method="post" id="registerForm">
-        @* @Html.AntiForgeryToken() *@
+        @Html.AntiForgeryToken()
 
         <div class="form-group">
             <label asp-for="Username" class="form-label">Имя пользователя *</label>

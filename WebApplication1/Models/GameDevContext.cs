@@ -28,6 +28,7 @@ public class GameDevContext : DbContext
         // User configuration
         modelBuilder.Entity<User>(entity =>
         {
+            // user
             entity.ToTable("Users");
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
@@ -42,6 +43,43 @@ public class GameDevContext : DbContext
             modelBuilder.Entity<Project>()
                 .Property(p => p.Budget)
                 .HasPrecision(18, 2);
+
+            // task
+            modelBuilder.Entity<Task>(entity =>
+            {
+                entity.ToTable("Tasks");
+                entity.HasKey(t => t.Id);
+
+                entity.Property(t => t.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(t => t.Priority)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(t => t.Status)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(t => t.EstimatedTime)
+                    .IsRequired();
+
+                entity.Property(t => t.CreatedDate)
+                    .HasColumnType("datetime2");
+
+                // Связь с Project
+                entity.HasOne(t => t.Project)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(t => t.ProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Связь с Employee
+                entity.HasOne(t => t.AssignedEmployee)
+                    .WithMany()
+                    .HasForeignKey(t => t.AssignedEmployeeId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
         });
     }
