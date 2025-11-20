@@ -21,5 +21,30 @@ public class GameDevContext : DbContext
     public DbSet<TechnicalRequirements> TechnicalRequirements { get; set; }
     public DbSet<Asset> Assets { get; set; }
     public DbSet<BugReport> BugReports { get; set; }
+    public DbSet<User> Users { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // User configuration
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("Users");
+            entity.HasKey(u => u.Id);
+            entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
+            entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
+            entity.Property(u => u.Password).IsRequired().HasMaxLength(100);
+            entity.Property(u => u.Role).IsRequired().HasMaxLength(20);
+
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.Salary)
+                .HasPrecision(18, 2); // 18 цифр всего, 2 после запятой
+
+            modelBuilder.Entity<Project>()
+                .Property(p => p.Budget)
+                .HasPrecision(18, 2);
+
+        });
+    }
+
 }
 

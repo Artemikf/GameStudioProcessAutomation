@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.Models;
 using System.Diagnostics;
+using WebApplication1.Filters;
+using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -19,13 +20,9 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        //public IActionResult Projects()
-        //{
-        //    var projects = _context.Projects.ToList();
-        //    return View(projects);
-        //}
 
         // Get Create
+        [TypeFilter(typeof(AuthAuthorizationFilter))]
         [HttpGet]
         public IActionResult CreateProject()
         {
@@ -132,6 +129,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Edit Project
+        [TypeFilter(typeof(AdminAuthorizationFilter))]
         [HttpGet]
         public IActionResult EditProject(int id)
         {
@@ -144,6 +142,7 @@ namespace WebApplication1.Controllers
         }
 
         // POST: Edit Project
+        [TypeFilter(typeof(AdminAuthorizationFilter))]
         [HttpPost]
         public IActionResult EditProject(int id, IFormCollection form)
         {
@@ -209,6 +208,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Delete Project
+        [TypeFilter(typeof(AdminAuthorizationFilter))]
         [HttpGet]
         public IActionResult DeleteProject(int id)
         {
