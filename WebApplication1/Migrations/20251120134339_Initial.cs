@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WebApplication1.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,8 +38,7 @@ namespace WebApplication1.Migrations
                     Password = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ConfirmPassword = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -222,12 +221,14 @@ namespace WebApplication1.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Priority = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     EstimatedTime = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProjectId = table.Column<int>(type: "int", nullable: false),
-                    AssignedEmployeeId = table.Column<int>(type: "int", nullable: true)
+                    AssignedEmployeeId = table.Column<int>(type: "int", nullable: true),
+                    EmployeeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -235,6 +236,12 @@ namespace WebApplication1.Migrations
                     table.ForeignKey(
                         name: "FK_Tasks_Employees_AssignedEmployeeId",
                         column: x => x.AssignedEmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Tasks_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -295,6 +302,11 @@ namespace WebApplication1.Migrations
                 name: "IX_Tasks_AssignedEmployeeId",
                 table: "Tasks",
                 column: "AssignedEmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_EmployeeId",
+                table: "Tasks",
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_ProjectId",

@@ -3,16 +3,34 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using WebApplication1.Filters;
 using WebApplication1.Models;
+using WebApplication1.Patterns.Observer;
 
 namespace WebApplication1.Controllers
 {
     public class HomeController : Controller
     {
         private readonly GameDevContext _context;
+        private readonly NotificationService _notification;
 
         public HomeController(GameDevContext context)
         {
             _context = context;
+            _notification = NotificationService.GetInstance();
+
+            // Подписываем наблюдателей при первом вызове
+            AttachObservers();
+        }
+
+        private void AttachObservers()
+        {
+            // Добавляем наблюдателей (только один раз)
+            var logObserver = new LogObserver("logs/project_notifications.txt");
+            var consoleObserver = new ConsoleObserver();
+            var emailObserver = new EmailObserver();
+
+            _notification.Attach(logObserver);
+            _notification.Attach(consoleObserver);
+            _notification.Attach(emailObserver);
         }
 
         public IActionResult Index()
@@ -20,6 +38,11 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+        // GET: Notifications
+        public IActionResult Notifications()
+        {
+            return View();
+        }
 
         // Get Create
         [TypeFilter(typeof(AuthAuthorizationFilter))]
@@ -62,6 +85,11 @@ namespace WebApplication1.Controllers
                 _context.SaveChanges();
 
                 Debug.WriteLine($"project saves: {project.Name}, ID: {project.Id}");
+
+                // УВЕДОМЛЕНИЕ: проект создан
+                _notification.Notify("Project", "created", project.Name);
+
+                TempData["SuccessMessage"] = $"Проект '{project.Name}' успешно создан!";
 
                 // перенаправляю на список проектов
                 return RedirectToAction("Projects");
@@ -182,6 +210,9 @@ namespace WebApplication1.Controllers
                 Debug.WriteLine($"Database changes saved. Rows affected: {changes}");
                 Debug.WriteLine($"=== EDIT PROJECT COMPLETED ===");
 
+                // УВЕДОМЛЕНИЕ: проект обновлен
+                _notification.Notify("Project", "updated", project.Name);
+
                 TempData["SuccessMessage"] = $"Проект '{project.Name}' успешно обновлен!";
                 return RedirectToAction("Projects");
             }
@@ -230,9 +261,14 @@ namespace WebApplication1.Controllers
                 var project = _context.Projects.Find(id);
                 if (project != null)
                 {
+                    string projectName = project.Name;
                     _context.Projects.Remove(project);
                     _context.SaveChanges();
-                    TempData["SuccessMessage"] = $"Проект '{project.Name}' успешно удален!";
+
+                    // УВЕДОМЛЕНИЕ: проект удален
+                    _notification.Notify("Project", "deleted", projectName);
+
+                    TempData["SuccessMessage"] = $"Проект '{projectName}' успешно удален!";
                 }
                 return RedirectToAction("Projects");
             }

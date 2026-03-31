@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Notifications";
+
+    var notifications = new List<string>();
+    string logFile = "logs/project_notifications.txt";
+
+    // Проверяем существование файла
+    if (System.IO.File.Exists(logFile))
+    {
+        notifications = System.IO.File.ReadAllLines(logFile)
+            .Reverse()
+            .Take(50)
+            .ToList();
+    }
+}
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>Система уведомлений (Observer Pattern)</h2>
+        <p class="lead">Отслеживание изменений в проектах и задачах</p>
+    </div>
+
+    <div class="alert alert-info">
+        <h5>Как это работает:</h5>
+        <p>При создании, изменении или удалении проекта/задачи, все подписанные наблюдатели получают уведомления:</p>
+        <ul>
+            <li><strong>File Logger</strong> - сохраняет в файл logs/project_notifications.txt</li>
+            <li><strong>Console Logger</strong> - выводит в консоль отладки</li>
+            <li><strong>Email Notifier</strong> - уведомляет администраторов (эмуляция)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Последние уведомления</h4>
+        </div>
+        <div class="card-body">
+            @if (notifications.Count > 0)
+            {
+                <div class="list-group">
+                    @foreach (var notification in notifications)
+                    {
+                        <div class="list-group-item">
+                            @notification
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <p>Нет уведомлений.</p>
+                    <p>Создайте, измените или удалите проект чтобы увидеть уведомления.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="@Url.Action("Projects")" class="btn btn-primary">К проектам</a>
+        <a href="@Url.Action("CreateProject")" class="btn btn-success">Создать проект</a>
+    </div>
+</div>

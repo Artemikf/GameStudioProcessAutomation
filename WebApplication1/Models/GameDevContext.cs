@@ -44,7 +44,17 @@ public class GameDevContext : DbContext
                 .Property(p => p.Budget)
                 .HasPrecision(18, 2);
 
-            // task
+            // --------------------- EMPLOYEE ---------------------
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.Salary)
+                .HasPrecision(18, 2);
+
+            // --------------------- PROJECT ---------------------
+            modelBuilder.Entity<Project>()
+                .Property(p => p.Budget)
+                .HasPrecision(18, 2);
+
+            // --------------------- TASK ---------------------
             modelBuilder.Entity<Task>(entity =>
             {
                 entity.ToTable("Tasks");
@@ -68,13 +78,11 @@ public class GameDevContext : DbContext
                 entity.Property(t => t.CreatedDate)
                     .HasColumnType("datetime2");
 
-                // Связь с Project
                 entity.HasOne(t => t.Project)
                     .WithMany(p => p.Tasks)
                     .HasForeignKey(t => t.ProjectId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Связь с Employee
                 entity.HasOne(t => t.AssignedEmployee)
                     .WithMany()
                     .HasForeignKey(t => t.AssignedEmployeeId)

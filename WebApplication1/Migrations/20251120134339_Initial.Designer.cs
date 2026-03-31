@@ -12,8 +12,8 @@ using WebApplication1.Models;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(GameDevContext))]
-    [Migration("20251120015115_RemoveConfirmPasswordFromUser")]
-    partial class RemoveConfirmPasswordFromUser
+    [Migration("20251120134339_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -243,31 +243,42 @@ namespace WebApplication1.Migrations
                     b.Property<int?>("AssignedEmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("EstimatedTime")
                         .HasColumnType("int");
 
                     b.Property<string>("Priority")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedEmployeeId");
 
+                    b.HasIndex("EmployeeId");
+
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Team", b =>
@@ -490,8 +501,13 @@ namespace WebApplication1.Migrations
             modelBuilder.Entity("WebApplication1.Models.Task", b =>
                 {
                     b.HasOne("WebApplication1.Models.Employee", "AssignedEmployee")
+                        .WithMany()
+                        .HasForeignKey("AssignedEmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("WebApplication1.Models.Employee", null)
                         .WithMany("AssignedTasks")
-                        .HasForeignKey("AssignedEmployeeId");
+                        .HasForeignKey("EmployeeId");
 
                     b.HasOne("WebApplication1.Models.Project", "Project")
                         .WithMany("Tasks")
